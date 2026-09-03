@@ -80,6 +80,17 @@ API lives on another domain) and serve `frontend/dist` with a history fallback s
 `/mophonik/:slug` resolves. Set `APP_URL` on the backend to its public URL —
 uploaded media URLs are built from it.
 
+For the `whitecloudindustry.com` deployment on the same EC2 host as `project_y`, use a
+separate Nginx vhost and keep `project_y` untouched. The repo includes:
+
+- `backend/deploy/nginx/whitecloudindustry.com.conf`
+- `backend/deploy/apply-whitecloudindustry.sh`
+
+That setup serves this app from `/home/ubuntu/Mophonic/frontend/dist`, proxies `/api`,
+`/admin`, and `/storage` to the Laravel backend, and bootstraps a Let's Encrypt cert
+with a webroot challenge before enabling HTTPS. It also runs `php artisan migrate --seed`
+so the `works` table is populated and the carousel images/videos can render.
+
 **MySQL in production.** No code changes; the migrations run on both drivers. In the
 server's `.env`:
 

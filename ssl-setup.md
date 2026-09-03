@@ -293,8 +293,26 @@ Use this checklist and only change the values in **bold**:
    - `ssl_certificate /etc/letsencrypt/live/<new-domain.com>/fullchain.pem;`
    - `ssl_certificate_key /etc/letsencrypt/live/<new-domain.com>/privkey.pem;`
 7. Validate:
-   - `sudo certbot certificates`
-   - `echo | openssl s_client -connect <new-domain.com>:443 -servername <new-domain.com> 2>/dev/null | openssl x509 -noout -subject -issuer -dates`
+    - `sudo certbot certificates`
+    - `echo | openssl s_client -connect <new-domain.com>:443 -servername <new-domain.com> 2>/dev/null | openssl x509 -noout -subject -issuer -dates`
+
+## 8) Keeping two projects independent on the same EC2 host
+
+Use one Nginx file per domain. Do not edit the existing `project_y` vhost when adding `whitecloudindustry.com`.
+
+For this repo, the new vhost template lives at:
+
+- `backend/deploy/nginx/whitecloudindustry.com.conf`
+
+Enable it alongside the existing site:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/whitecloudindustry.com /etc/nginx/sites-enabled/whitecloudindustry.com
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+If `project_y` is already the default site, leave its config and symlink untouched. The new `server_name whitecloudindustry.com www.whitecloudindustry.com;` block will keep traffic separate as long as the old vhost does not claim those hostnames.
 
 ---
 
