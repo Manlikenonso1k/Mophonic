@@ -1,77 +1,50 @@
-This project is "Utopia World" — a React 19 + Vite + Tailwind SPA on a Laravel 13 +
-Filament 4 backend. Read README.md first for the architecture. Two tasks: a rename,
-and a full shop feature.
+Two things on the Filament admin panel (Laravel 13 + Filament 4, Mophonik).
+Read FILAMENT_UI.md first — it documents how to customize Filament in this
+project. Follow it rather than discovering the theming by trial and error.
 
---- READ THESE BEFORE WRITING ANY CODE ---
+--- TASK 1: USER MANAGEMENT ---
 
-- FILAMENT_UI.md — how to customize Filament in this project. Follow it. Do not
-  guess at Filament 4 theming or discover it by trial and error.
-- PAYMENTS_INTEGRATION.md — the payment integration pattern to use for checkout.
-- index.html and styles.css in the project root — the original scraped page. This
-  is the visual source of truth for the "rock" aesthetic: dark, high-contrast,
-  large type, the stack-and-scale carousel feel.
+I need to create and manage admin users from inside the panel instead of running
+`php artisan make:filament-user` every time.
 
-Also use my installed UI/UX skill for the frontend design work.
+Build a Users resource:
+- List: name, email, created date, with search.
+- Create: name, email, password + confirmation. Hash the password on save —
+  never write plaintext to the column.
+- Edit: same fields, but leave the password blank to keep the existing one.
+  Only hash and update when a new value is entered.
+- Delete: block a user from deleting their own account, or the last remaining
+  admin. Getting locked out of the panel is the failure mode here.
+- Validate email uniqueness and require a reasonable minimum password length.
 
---- TASK 1: RENAME TO MOPHONIK ---
+Style it to match the existing resources in the panel, per FILAMENT_UI.md — not
+default Filament styling.
 
-Replace "Utopia World" / "utopia-world" / "utopia" with "Mophonik" / "mophonik"
-throughout. Be systematic — grep for all case variants before editing. Cover at
-minimum: app name and APP_NAME, package.json names, the Filament panel brand,
-seeder data, site settings defaults, page titles and meta, and README.md.
+Access control: check how canAccessPanel is currently implemented on the User
+model. If every user can reach the panel, tell me before you build this — a
+Users screen that anyone can reach means anyone can mint themselves an admin.
+Show me the current state and your proposed approach before writing it.
 
-The detail route is currently /utopia-world/:slug — rename it to /mophonik/:slug
-and update the React router, the "Explore" button, and the deploy note in README
-about the history fallback.
+Write tests: a user can be created and the password is hashed; editing with a
+blank password leaves the hash unchanged; a user cannot delete themselves.
 
-Do not rename the DB_DATABASE value in any committed .env.example without telling
-me — flag it instead so I decide.
+--- TASK 2: MOBILE SIDEBAR AT 320px ---
 
---- TASK 2: SHOP ---
+At 320px viewport, opening the hamburger menu makes the sidebar cover the entire
+screen with no visible way back — there's no backdrop to tap and no close control.
 
-Build a shop for food products, visually continuous with the homepage. Same dark
-rock aesthetic, same typography and motion language — it should read as the same
-site, not a bolted-on store.
+Fix it so the menu is dismissable:
+- The sidebar should not occupy the full viewport width. Leave a visible strip of
+  the page behind it.
+- Add a dimmed backdrop over the remaining area that closes the menu when tapped.
+- Add an explicit close (X) control in the sidebar header, since a backdrop alone
+  isn't obvious on a small screen.
+- Escape key closes it too.
+- When open, prevent the page behind from scrolling.
 
-Frontend pages:
-1. Shop — product grid, filterable by category. Product cards with image, name,
-   price, add-to-cart.
-2. Product detail — larger imagery, description, quantity, add-to-cart.
-3. Cart — line items, quantity adjust, remove, running total.
-4. Checkout — customer details, order summary, payment via the integration in
-   PAYMENTS_INTEGRATION.md.
+Check FILAMENT_UI.md for how this panel's theme is built before overriding
+anything. Prefer Filament's own configuration and theme CSS over blanket
+!important overrides on its internal classes — those break on the next upgrade.
 
-Backend:
-- Migrations and models for Category, Product, Order, OrderItem. Products need
-  image upload (same storage/app/public pattern as works), price, description,
-  stock, category, visibility, sort order.
-- Seed realistic dummy food products across a few categories, with placeholder
-  images, so I can see the design working immediately.
-- API endpoints following the existing /api/site convention.
-
-Filament admin — custom UI, NOT stock Filament styling:
-- Products resource: image upload, category, price, stock, visibility, drag to
-  reorder. Match the pattern already used by the Videos & Albums resource.
-- Categories resource: create, rename, reorder, assign products.
-- Orders resource: order list with status, customer details, line items, totals.
-  Read-only line items — staff shouldn't be able to fabricate an order's contents.
-- Dashboard widgets: sales overview (revenue over time), recent orders, and order
-  count by status.
-
-Theme the panel per FILAMENT_UI.md so it carries the site's identity rather than
-default Filament blue.
-
---- CONSTRAINTS ---
-
-- Don't break the existing carousel, /api/site, /api/subscribe, or the works
-  admin screen. Run `php artisan test` when you're done — the existing suite
-  covers those and must still pass.
-- Write tests for the new work too: cart totals, order creation, product API
-  ordering and visibility, and admin access control on the orders screen.
-- Payment credentials go in .env only. Never commit a key.
-
---- ORDER OF WORK ---
-
-Do the rename first and confirm the app still boots and tests pass. Then show me
-the shop data model before building the UI, so I can correct the schema before
-you've built four pages on top of it.
+Verify at 320px, 375px, and 768px. Confirm the desktop sidebar behaviour is
+unchanged.

@@ -34,6 +34,10 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('Mophonik')
             ->login(Login::class)
+            // Filament's default 20rem is the whole viewport on a 320px screen,
+            // which buries its own close-overlay and traps the menu open. The
+            // width is expressed as CSS so a strip of the page always shows.
+            ->sidebarWidth('min(20rem, calc(100vw - 3.25rem))')
             ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
                 'primary' => '#d1552e',
@@ -80,6 +84,11 @@ class AdminPanelProvider extends PanelProvider
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,
             fn (): string => view('filament.theme')->render(),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_START,
+            fn (): string => view('filament.sidebar-close')->render(),
         );
 
         FilamentView::registerRenderHook(

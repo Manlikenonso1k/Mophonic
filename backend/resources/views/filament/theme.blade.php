@@ -158,6 +158,62 @@
         letter-spacing: 0.08em !important;
     }
 
+    /* ---------------------------------------------------------------------
+       Mobile navigation. The width itself is panel configuration
+       (->sidebarWidth), so what is left here is only appearance and the two
+       affordances Filament does not ship: a visible close control and a
+       scroll lock. Everything is inside the mobile query — the desktop
+       sidebar is untouched.
+    --------------------------------------------------------------------- */
+    .mo-sidebar-close-ctn {
+        display: none;
+    }
+
+    @media (max-width: 1023px) {
+        .mo-sidebar-close-ctn {
+            display: block;
+            position: absolute;
+            inset-block-start: 0;
+            inset-inline-end: 0;
+            z-index: 1;
+        }
+
+        .mo-sidebar-close {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            color: var(--mo-ink-muted);
+            transition: color 222ms ease, background-color 222ms ease;
+        }
+
+        .mo-sidebar-close:hover,
+        .mo-sidebar-close:focus-visible {
+            color: var(--mo-ink);
+            background: rgba(243, 243, 243, 0.06);
+        }
+
+        .mo-sidebar-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Filament's scrim is 50% of near-black, which on this dark ground
+           reads as nothing. Blur plus a stronger wash makes the strip legible
+           as somewhere to tap. */
+        .fi-sidebar-close-overlay {
+            background-color: rgba(4, 5, 6, 0.72);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        /* Hold the page still behind the open menu. */
+        body:has(#fi-main-sidebar.fi-sidebar-open) {
+            overflow: hidden;
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         * {
             animation-duration: 0.001ms !important;
