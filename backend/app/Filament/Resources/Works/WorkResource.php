@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class WorkResource extends Resource
 {
@@ -21,6 +22,8 @@ class WorkResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFilm;
 
     protected static ?string $navigationLabel = 'Videos & Albums';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?string $modelLabel = 'video / album';
 

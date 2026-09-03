@@ -113,6 +113,10 @@ body {
   font-family: var(--font-news);
   text-transform: uppercase;
   letter-spacing: 0.8px;
+}
+
+/* The carousel is a fixed, full-viewport stage; the shop scrolls normally. */
+body.is-immersive {
   overflow: hidden;
 }
 
@@ -354,3 +358,255 @@ input[type='checkbox']:checked:after { transform: scale(1); opacity: 1; }
   position: relative;
 }
 .swiper-carousel .swiper-slide { position: relative; }
+
+/* ---------------------------------------------------------------------------
+   Shop — same ground, type and motion as the carousel, laid out to scroll
+--------------------------------------------------------------------------- */
+.shop {
+  min-height: 100dvh;
+  padding: 96px 5vw 140px;
+  position: relative;
+}
+
+@media screen and (max-width: 680px) {
+  .shop { padding: 84px 20px 150px; }
+}
+
+/* A single slow ember bloom, in the register of the album covers. */
+.shop::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(70% 50% at 50% 0%, rgba(209, 85, 46, 0.18), transparent 72%);
+}
+
+.shop-eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.55;
+}
+
+.shop-title {
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+
+@media screen and (max-width: 680px) {
+  .shop-title { font-size: 26px; }
+}
+
+/* Long-form copy and typed input drop the global uppercase so they stay readable. */
+.prose {
+  text-transform: none;
+  letter-spacing: 0.2px;
+  line-height: 1.6;
+  opacity: 0.78;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 28px 0 36px;
+}
+
+.chip {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(217, 217, 217, 0.04);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: 30px;
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12px;
+  letter-spacing: 1.1px;
+  transition-duration: 222ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chip:hover { background: rgba(217, 217, 217, 0.15); }
+.chip.is-active { background: #fff; color: #000; border-color: #fff; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 22px;
+}
+
+@media screen and (max-width: 680px) {
+  .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+.product-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+  transition: transform 444ms cubic-bezier(0.19, 1, 0.22, 1), border-color 222ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.product-card .frame {
+  aspect-ratio: 4 / 5;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.product-card .frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 888ms cubic-bezier(0.19, 1, 0.22, 1), opacity 300ms ease;
+}
+
+.product-card:hover .frame img { transform: scale(1.04); }
+
+.product-card .body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.price { letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+.muted { opacity: 0.5; font-size: 12px; }
+
+.sold-out {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+/* Quantity stepper — 44px targets, same pill language as the buttons. */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.stepper button {
+  width: 44px;
+  height: 40px;
+  font-size: 16px;
+  line-height: 1;
+  transition-duration: 222ms;
+}
+
+.stepper button:hover:not(:disabled) { background: rgba(217, 217, 217, 0.15); }
+.stepper button:disabled { opacity: 0.3; cursor: not-allowed; }
+.stepper .count { min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.line-item {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media screen and (max-width: 680px) {
+  .line-item { grid-template-columns: 60px 1fr; row-gap: 12px; }
+  .line-item .line-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+}
+
+.line-item .thumb {
+  width: 76px;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #0a0a0a;
+}
+
+.panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.totals-row.total {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  margin-top: 10px;
+  padding-top: 16px;
+  font-size: 16px;
+}
+
+/* Form fields — labels stay uppercase, values do not. */
+.field { margin-bottom: 18px; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: 0.6;
+  margin-bottom: 7px;
+}
+
+.field .input,
+.field textarea.input {
+  text-transform: none;
+  letter-spacing: 0.2px;
+  text-align: left;
+  border-radius: 5px;
+  padding: 0 12px;
+}
+
+.field textarea.input {
+  height: auto;
+  min-height: 92px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.field.has-error .input { border-color: #e2653a; }
+
+.field-error {
+  margin-top: 7px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #f0865e;
+}
+
+.error-summary {
+  border: 1px solid #e2653a;
+  border-radius: 5px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.error-summary a { text-decoration: underline; }
+
+.empty {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.cart-pill { font-variant-numeric: tabular-nums; }

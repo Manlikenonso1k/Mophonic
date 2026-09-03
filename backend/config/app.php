@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Front End URL
+    |--------------------------------------------------------------------------
+    |
+    | Where the React SPA is served from. Payment callbacks land on the API and
+    | then redirect the shopper back here.
+    |
+    */
+
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

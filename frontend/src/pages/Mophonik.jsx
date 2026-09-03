@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import BackgroundVideos from '../components/BackgroundVideos'
 import WorkCarousel from '../components/WorkCarousel'
+import useBodyClass from '../hooks/useBodyClass'
 import useParallaxTilt from '../hooks/useParallaxTilt'
 import useScrambleText from '../hooks/useScrambleText'
 
 export default function Mophonik({ settings, works }) {
   const [activeIndex, setActiveIndex] = useState(0)
 
+  // The carousel owns the viewport; the shop pages scroll.
+  useBodyClass('is-immersive', true)
   useParallaxTilt()
 
   const eyebrow = useScrambleText(settings.eyebrow)

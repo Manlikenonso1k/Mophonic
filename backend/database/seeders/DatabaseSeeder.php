@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $this->call(WorkSeeder::class);
+        $this->call([
+            WorkSeeder::class,
+            ShopSeeder::class,
+        ]);
     }
 }

@@ -42,13 +42,61 @@ npm run dev
 Vite proxies `/api` and `/storage` to `127.0.0.1:8010`, so nothing else needs
 configuring in development. Point it elsewhere with `VITE_BACKEND_ORIGIN`.
 
+## The site
+
+| Route | What it is |
+| --- | --- |
+| `/` | The carousel — background video per work, stack-and-scale covers |
+| `/mophonik/{slug}` | A work's detail page |
+| `/shop` | Product grid, filterable by category |
+| `/shop/{slug}` | Product detail |
+| `/cart` · `/checkout` | Cart and checkout (guest, no accounts) |
+| `/shop/thank-you?reference=…` | Order confirmation |
+
 ## Managing content
 
 | Screen | What it does |
 | --- | --- |
+| **Products** | Photo, category, price (entered in naira, stored in kobo), stock, unit, visibility. Drag rows to reorder. |
+| **Categories** | Create, rename, reorder, and move products between categories. |
+| **Orders** | Every checkout: customer, line items, totals, fulfilment status. Line items are read-only. |
 | **Videos & Albums** | One row per carousel item: title, slug, type, cover artwork, background video, order, visibility. Drag rows to reorder. |
 | **Subscribers** | Emails captured by the newsletter form in the menu. |
-| **Site settings** | Header text, shop/terms links, newsletter heading, and the menu links. |
+| **Site settings** | Header text, shop/terms links, newsletter heading, delivery fee, and the menu links. |
+
+The dashboard carries three widgets: revenue over time (7/30/90 days), order counts by
+status, and the most recent orders.
+
+Sample orders for looking at the dashboard and orders screen:
+
+```sh
+php artisan db:seed --class=DemoOrderSeeder
+```
+
+That seeder is deliberately not part of `db:seed` — it only runs when you ask for it.
+
+## Payments
+
+Checkout follows the Paystack redirect flow. Amounts are stored and sent in **kobo**;
+the server re-prices every cart from its own table, so a tampered client total changes
+nothing. Keys live in `.env` only:
+
+```
+PAYSTACK_PUBLIC_KEY=
+PAYSTACK_SECRET_KEY=
+PAYSTACK_PAYMENT_URL=https://api.paystack.co
+```
+
+**With no keys set, checkout still works** — the order is recorded and marked as awaiting
+manual payment instead of redirecting. Once keys are present, checkout redirects to
+Paystack, and `GET /shop/payment/callback` verifies the transaction server-side.
+
+Register `https://your-domain.com/webhooks/paystack` in the Paystack dashboard for
+**Test** and again for **Live**. One endpoint handles every event: the signature is
+checked with SHA-512 in constant time, unknown references are acknowledged with 200,
+and crediting is idempotent, so the callback and the webhook racing cannot double-count
+an order or draw stock down twice. Payment moves an order to **New** — the staff queue —
+never straight to fulfilled.
 
 Replacing a video or album: open the item, drop a new file into **Cover artwork** or
 **Background video** (or paste a URL instead), save, reload the site. An uploaded file
@@ -62,6 +110,12 @@ Uploads land in `backend/storage/app/public/works/…` and are served through th
 
 - `GET /api/site` — settings plus the ordered, visible works (`cover`, `video`, `href`).
 - `POST /api/subscribe` — `{ email, terms }`, stores a subscriber.
+- `GET /api/shop` — categories, visible products, delivery fee.
+- `GET /api/shop/products/{slug}` — one product.
+- `POST /api/orders` — `{ customer fields, items: [{product_id, quantity}] }`. Prices are
+  never accepted from the client; the server totals the cart itself.
+- `GET /api/orders/{reference}` — order confirmation.
+- `GET /shop/payment/callback` · `POST /webhooks/paystack` — payment (web routes).
 
 ## Tests
 
@@ -69,16 +123,21 @@ Uploads land in `backend/storage/app/public/works/…` and are served through th
 cd backend && php artisan test
 ```
 
-Covers the API payload and ordering, upload-wins-over-URL, replacing a cover and a
+36 tests. Site: API payload and ordering, upload-wins-over-URL, replacing a cover and a
 video through the admin form, subscriber validation, panel access control, every admin
-screen, and saving site settings.
+screen, saving site settings. Shop: product visibility and ordering, cart totals from the
+price table, duplicate-line merging, stock limits, order creation with snapshotted line
+items, client-supplied prices ignored, zero-priced carts rejected, idempotent crediting
+with stock drawn down once, webhook signature handling, orders not creatable by hand, and
+the order form exposing no line items or totals.
 
 ## Deploying
 
 Build the SPA with `npm run build` (set `VITE_API_BASE=https://api.example.com` if the
 API lives on another domain) and serve `frontend/dist` with a history fallback so
-`/mophonik/:slug` resolves. Set `APP_URL` on the backend to its public URL —
-uploaded media URLs are built from it.
+`/mophonik/:slug`, `/shop/:slug`, `/cart` and `/checkout` all resolve. Set `APP_URL` on
+the backend to its public URL — uploaded media URLs are built from it — and
+`FRONTEND_URL` to the SPA's URL, which is where the payment callback sends shoppers back.
 
 For the `whitecloudindustry.com` deployment on the same EC2 host as `project_y`, use a
 separate Nginx vhost and keep `project_y` untouched. The repo includes:

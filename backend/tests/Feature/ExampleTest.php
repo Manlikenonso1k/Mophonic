@@ -14,6 +14,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // The API host has no public pages of its own; it hands off to the admin.
+        $response->assertRedirect('/admin');
     }
 }

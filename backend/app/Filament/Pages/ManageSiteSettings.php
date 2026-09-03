@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\SiteSetting;
+use App\Support\Money;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -17,6 +18,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class ManageSiteSettings extends Page
 {
@@ -27,6 +29,8 @@ class ManageSiteSettings extends Page
     protected static ?string $title = 'Site settings';
 
     protected static ?string $navigationLabel = 'Site settings';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?int $navigationSort = 3;
 
@@ -68,8 +72,27 @@ class ManageSiteSettings extends Page
                 Section::make('Links')
                     ->columns(2)
                     ->schema([
-                        TextInput::make('shop_url')->url()->required(),
-                        TextInput::make('terms_url')->url()->required(),
+                        TextInput::make('shop_url')
+                            ->label('Shop link')
+                            ->required()
+                            ->helperText('A path such as /shop, or a full URL.'),
+                        TextInput::make('terms_url')
+                            ->label('Terms link')
+                            ->required()
+                            ->helperText('A path such as /terms, or a full URL.'),
+                    ]),
+
+                Section::make('Shop')
+                    ->schema([
+                        TextInput::make('delivery_fee_kobo')
+                            ->label('Delivery fee')
+                            ->prefix('₦')
+                            ->numeric()
+                            ->minValue(0)
+                            ->required()
+                            ->helperText('Added to every order at checkout. Zero for free delivery.')
+                            ->formatStateUsing(fn (?int $state) => Money::toNaira((int) $state))
+                            ->dehydrateStateUsing(fn ($state) => Money::toKobo((float) $state)),
                     ]),
 
                 Section::make('Newsletter')
