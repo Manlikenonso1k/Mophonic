@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -m)",
+      "Bash(php -r \"echo PHP_INT_SIZE;\")",
+      "Bash(composer require *)",
+      "Bash(composer show *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(curl -s http://127.0.0.1:8000/api/site)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://127.0.0.1:8000/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"up=%{http_code}\\\\n\" http://127.0.0.1:8000/up)",
+      "Bash(curl -s -H \"Accept: application/json\" -w \"\\\\nstatus=%{http_code}\\\\n\" http://127.0.0.1:8000/api/site)",
+      "Bash(curl -s http://127.0.0.1:8010/api/site)",
+      "Bash(curl -s -o /dev/null -w \"admin=%{http_code}\\\\n\" http://127.0.0.1:8010/admin/login)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"const p=require\\('./node_modules/swiper/package.json'\\); console.log\\(p.version\\); console.log\\(Object.keys\\(p.exports\\).slice\\(0,20\\).join\\(' '\\)\\)\")",
+      "Bash(mkdir -p utopia-rebuild/frontend/src/assets)",
+      "Bash(rm -f utopia-rebuild/frontend/src/assets/react.svg utopia-rebuild/frontend/src/assets/hero.png utopia-rebuild/frontend/src/assets/vite.svg utopia-rebuild/frontend/src/App.css)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Microsoft/Edge/Application/**)",
+      "Bash(curl -s -o /dev/null -w \"vite=%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"proxyapi=%{http_code}\\\\n\" http://localhost:5173/api/site)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=1440,900 --virtual-time-budget=9000 --screenshot=home.png \"http://localhost:5173/\")",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=1440,900 --virtual-time-budget=9000 --user-data-dir=\"C:\\\\Users\\\\TENSTR~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\chrome-prof\" --screenshot=\"C:\\\\Users\\\\TENSTR~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\home.png\" \"http://localhost:5173/\")",
+      "Read(//c/Users/TENSTR~1/AppData/Local/Temp/claude/**)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=1440,900 --virtual-time-budget=9000 --user-data-dir=\"C:\\\\Users\\\\TENSTR~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\chrome-prof\" --screenshot=\"C:\\\\Users\\\\TENSTR~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\detail.png\" \"http://localhost:5173/utopia-world/circus-maximus\")",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=1440,900 --remote-debugging-port=9222 --user-data-dir=\"C:\\\\Users\\\\TENSTR~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\chrome-cdp\" about:blank)",
+      "Bash(curl -s http://127.0.0.1:9222/json/version)",
+      "Bash(node shot.mjs \"http://localhost:5173/\" \"C:\\\\\\\\Users\\\\\\\\TENSTR~1\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\menu.png\" \"document.querySelector\\('.navigation'\\).click\\(\\); 'clicked'\")",
+      "Bash(node shot.mjs \"http://localhost:5173/\" \"C:\\\\\\\\Users\\\\\\\\TENSTR~1\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\menu2.png\" \"document.querySelector\\('.navigation'\\).click\\(\\); setTimeout\\(\\(\\)=>document.querySelector\\('.js-menu button.bare'\\).click\\(\\), 1200\\); 'clicked'\")",
+      "Bash(curl -s -X POST http://localhost:5173/api/subscribe -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"test@example.com\",\"terms\":true}' -w \"\\\\nstatus=%{http_code}\\\\n\")",
+      "Bash(curl -s -X POST http://localhost:5173/api/subscribe -H \"Content-Type: application/json\" -H \"Accept: application/json\" -d '{\"email\":\"nope\",\"terms\":false}' -w \"\\\\nstatus=%{http_code}\\\\n\")"
+    ]
+  }
+}
