@@ -168,4 +168,41 @@ class RoleAccessTest extends TestCase
         $this->get('/admin/manage-site-settings')->assertForbidden();
         $this->get('/admin/subscribers')->assertForbidden();
     }
+
+    public function test_seeding_without_a_configured_email_still_leaves_a_way_in(): void
+    {
+        config(['admin.super_admin_email' => null, 'admin.fallback_admin_email' => null]);
+
+        $first = User::factory()->create();
+        User::factory()->create();
+
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $this->assertTrue($first->fresh()->hasRole(User::SUPER_ADMIN));
+    }
+
+    public function test_it_falls_back_to_the_admin_email_when_the_super_email_is_unset(): void
+    {
+        $intended = User::factory()->create(['email' => 'owner@example.com']);
+        User::factory()->create();
+
+        config(['admin.super_admin_email' => null, 'admin.fallback_admin_email' => 'owner@example.com']);
+
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $this->assertTrue($intended->fresh()->hasRole(User::SUPER_ADMIN));
+    }
+
+    public function test_it_does_not_promote_anyone_when_a_super_admin_already_exists(): void
+    {
+        $existing = $this->superAdmin();
+        $other = User::factory()->create();
+
+        config(['admin.super_admin_email' => null, 'admin.fallback_admin_email' => null]);
+
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $this->assertTrue($existing->fresh()->hasRole(User::SUPER_ADMIN));
+        $this->assertFalse($other->fresh()->hasRole(User::SUPER_ADMIN));
+    }
 }
