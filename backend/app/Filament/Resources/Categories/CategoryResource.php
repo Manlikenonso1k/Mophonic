@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categories;
 
+use App\Filament\Concerns\AuthorizesWithPermissions;
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Filament\Resources\Categories\Pages\ListCategories;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class CategoryResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
     protected static ?string $model = Category::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
@@ -27,6 +30,11 @@ class CategoryResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?int $navigationSort = 11;
+
+    protected static function permissionSubject(): string
+    {
+        return 'category';
+    }
 
     public static function form(Schema $schema): Schema
     {

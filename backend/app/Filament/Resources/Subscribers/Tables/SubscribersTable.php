@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Subscribers\Tables;
 
+use App\Filament\Resources\Subscribers\SubscriberResource;
+use App\Models\Subscriber;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -32,12 +34,15 @@ class SubscribersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (Subscriber $record): bool => SubscriberResource::canEdit($record)),
             ])
-            ->toolbarActions([
+            // No bulk delete for anyone who cannot delete: an empty
+            // group would still draw the selection checkboxes.
+            ->toolbarActions(SubscriberResource::canDeleteAny() ? [
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ] : []);
     }
 }

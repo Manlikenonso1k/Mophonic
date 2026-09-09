@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Works\Schemas;
 
 use App\Models\Work;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +20,7 @@ class WorkForm
         return $schema
             ->components([
                 Section::make('Details')
+                    ->disabled(fn (): bool => ! self::canEditDetails())
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')
@@ -46,6 +48,7 @@ class WorkForm
                     ]),
 
                 Section::make('Cover artwork')
+                    ->disabled(fn (): bool => ! self::canEditImages())
                     ->description('The vertical poster shown in the carousel. Upload a file, or paste a URL if the artwork is hosted elsewhere.')
                     ->columns(2)
                     ->schema([
@@ -65,6 +68,7 @@ class WorkForm
                     ]),
 
                 Section::make('Background video')
+                    ->disabled(fn (): bool => ! self::canEditImages())
                     ->description('Full-screen looping video that plays behind this slide.')
                     ->columns(2)
                     ->schema([
@@ -83,6 +87,7 @@ class WorkForm
                     ]),
 
                 Section::make('Placement')
+                    ->disabled(fn (): bool => ! self::canEditDetails())
                     ->columns(2)
                     ->schema([
                         TextInput::make('sort_order')
@@ -95,5 +100,18 @@ class WorkForm
                             ->default(true),
                     ]),
             ]);
+    }
+
+    /** Disabled fields are never dehydrated, so this holds server-side too. */
+    protected static function canEditDetails(): bool
+    {
+        return Filament::auth()->user()?->can('update_work') ?? false;
+    }
+
+    protected static function canEditImages(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return ($user?->can('update_work') || $user?->can('update_work_image')) ?? false;
     }
 }

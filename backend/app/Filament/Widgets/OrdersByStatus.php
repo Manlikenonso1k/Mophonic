@@ -4,11 +4,17 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use App\Support\Money;
+use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class OrdersByStatus extends StatsOverviewWidget
 {
+    public static function canView(): bool
+    {
+        return Filament::auth()->user()?->can('view_revenue') ?? false;
+    }
+
     protected ?string $heading = 'Orders';
 
     protected function getStats(): array

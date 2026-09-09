@@ -6,6 +6,7 @@ use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Order;
 use App\Support\Money;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -13,6 +14,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RecentOrders extends TableWidget
 {
+    public static function canView(): bool
+    {
+        return Filament::auth()->user()?->can('view_any_order') ?? false;
+    }
+
     protected static ?string $heading = 'Recent orders';
 
     protected int|string|array $columnSpan = 'full';

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Filament\Resources\Products\ProductResource;
 use App\Models\Product;
 use App\Support\Money;
 use Filament\Actions\BulkActionGroup;
@@ -69,13 +70,17 @@ class ProductsTable
                     ),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (Product $record): bool => ProductResource::canEdit($record)),
+                DeleteAction::make()
+                    ->visible(fn (Product $record): bool => ProductResource::canDelete($record)),
             ])
-            ->toolbarActions([
+            // No bulk delete for anyone who cannot delete: an empty
+            // group would still draw the selection checkboxes.
+            ->toolbarActions(ProductResource::canDeleteAny() ? [
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ] : []);
     }
 }

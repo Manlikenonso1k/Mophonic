@@ -8,7 +8,6 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -30,7 +29,7 @@ class ShopAdminTest extends TestCase
 
     public function test_an_admin_can_reach_every_shop_screen(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         $category = Category::factory()->create(['name' => 'Snacks']);
         $product = Product::factory()->for($category)->create(['name' => 'Chin Chin']);
@@ -50,7 +49,7 @@ class ShopAdminTest extends TestCase
 
     public function test_orders_cannot_be_created_by_hand(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         Order::factory()->create(['reference' => 'SHOP-EXISTING-1']);
 
@@ -64,7 +63,7 @@ class ShopAdminTest extends TestCase
 
     public function test_the_order_form_exposes_no_line_items_or_totals(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         $order = Order::factory()->create();
         OrderItem::factory()->for($order)->create();
@@ -78,7 +77,7 @@ class ShopAdminTest extends TestCase
 
     public function test_editing_an_order_changes_fulfilment_but_not_its_contents(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         $order = Order::factory()->create(['status' => 'new', 'total_kobo' => 500000]);
         $item = OrderItem::factory()->for($order)->create([
@@ -103,7 +102,7 @@ class ShopAdminTest extends TestCase
 
     public function test_an_admin_can_create_a_product_priced_in_naira(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         $category = Category::factory()->create();
 

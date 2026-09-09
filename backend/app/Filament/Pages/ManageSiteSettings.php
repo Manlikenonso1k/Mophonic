@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use App\Support\Money;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -33,6 +34,11 @@ class ManageSiteSettings extends Page
     protected static string|UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?int $navigationSort = 3;
+
+    public static function canAccess(): bool
+    {
+        return Filament::auth()->user()?->can('view_site_settings') ?? false;
+    }
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];
