@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\CartPricer;
+use App\Services\OrderNotifier;
 use App\Services\PaystackService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class OrderController extends Controller
     public function __construct(
         private readonly CartPricer $pricer,
         private readonly PaystackService $paystack,
+        private readonly OrderNotifier $notifier,
     ) {}
 
     public function store(Request $request): JsonResponse
@@ -64,6 +66,8 @@ class OrderController extends Controller
         });
 
         if (! $paymentRequired) {
+            $this->notifier->orderPlaced($order);
+
             return response()->json([
                 'requires_payment' => false,
                 'reference' => $order->reference,
@@ -91,6 +95,10 @@ class OrderController extends Controller
                 'message' => 'We could not start the payment. Please try again.',
             ], 422);
         }
+
+        // Announced only once the gateway has accepted it — a failed init
+        // deletes the order above, and there is nothing to tell the group.
+        $this->notifier->orderPlaced($order);
 
         return response()->json([
             'requires_payment' => true,

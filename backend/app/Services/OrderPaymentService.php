@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\DB;
 
 class OrderPaymentService
 {
+    public function __construct(private readonly OrderNotifier $notifier) {}
+
     /**
      * Credit an order. The callback and the webhook both fire for the same
-     * transaction and race routinely, so this has to be idempotent.
+     * transaction and race routinely, so this has to be idempotent — which is
+     * also what keeps the Telegram group to exactly one message per payment.
+     *
+     * @param  array<string, mixed>  $gateway  The verified Paystack payload.
      */
-    public function markPaid(Order $order): void
+    public function markPaid(Order $order, array $gateway = []): void
     {
         if ($order->isPaid()) {
             return;
@@ -37,11 +42,13 @@ class OrderPaymentService
                     ->decrement('stock', $item->quantity);
             }
         });
+
+        $this->notifier->paymentSucceeded($order, $gateway);
     }
 
-    public function markFailed(Order $order): void
+    public function markFailed(Order $order, ?string $reason = null): void
     {
-        if ($order->isPaid()) {
+        if ($order->isPaid() || $order->payment_status === 'failed') {
             return;
         }
 
@@ -49,5 +56,7 @@ class OrderPaymentService
             'status' => 'payment_failed',
             'payment_status' => 'failed',
         ]);
+
+        $this->notifier->paymentFailed($order, $reason);
     }
 }

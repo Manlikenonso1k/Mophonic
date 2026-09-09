@@ -1,50 +1,32 @@
-Two things on the Filament admin panel (Laravel 13 + Filament 4, Mophonik).
-Read FILAMENT_UI.md first — it documents how to customize Filament in this
-project. Follow it rather than discovering the theming by trial and error.
+Add Telegram notifications to this Laravel app.
 
---- TASK 1: USER MANAGEMENT ---
+Setup:
+- Config: add TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_ENABLED to .env
+  and a config/telegram.php file. Never read env() outside config files.
+- Create App\Services\TelegramNotifier with a send(string $message) method
+  that POSTs to https://api.telegram.org/bot{token}/sendMessage using
+  Laravel's Http client, with parse_mode 'HTML' and disable_web_page_preview true.
+- Wrap the call in try/catch, log failures with Log::error, and never let a
+  Telegram failure break the request that triggered it.
+- Add Http::timeout(10) and ->retry(2, 200).
 
-I need to create and manage admin users from inside the panel instead of running
-`php artisan make:filament-user` every time.
+Delivery:
+- Dispatch it from a queued job (ShouldQueue) so checkout isn't blocked by
+  the API call. Use the existing queue connection.
 
-Build a Users resource:
-- List: name, email, created date, with search.
-- Create: name, email, password + confirmation. Hash the password on save —
-  never write plaintext to the column.
-- Edit: same fields, but leave the password blank to keep the existing one.
-  Only hash and update when a new value is entered.
-- Delete: block a user from deleting their own account, or the last remaining
-  admin. Getting locked out of the panel is the failure mode here.
-- Validate email uniqueness and require a reasonable minimum password length.
+Notifications to send:
+1. New order placed — order reference, customer name, phone, delivery address,
+   line items with quantities, subtotal, delivery fee, total.
+2. Payment successful — order reference, amount, gateway reference, channel.
+3. Payment failed — order reference, amount, and the gateway's failure reason.
 
-Style it to match the existing resources in the panel, per FILAMENT_UI.md — not
-default Filament styling.
+Formatting:
+- Use HTML tags (<b>, <code>) not Markdown, to avoid escaping issues with
+  customer names. Escape all user-supplied values with htmlspecialchars
+  before interpolating.
+- Prefix each message type with a distinct emoji so they're scannable in
+  the group.
 
-Access control: check how canAccessPanel is currently implemented on the User
-model. If every user can reach the panel, tell me before you build this — a
-Users screen that anyone can reach means anyone can mint themselves an admin.
-Show me the current state and your proposed approach before writing it.
-
-Write tests: a user can be created and the password is hashed; editing with a
-blank password leaves the hash unchanged; a user cannot delete themselves.
-
---- TASK 2: MOBILE SIDEBAR AT 320px ---
-
-At 320px viewport, opening the hamburger menu makes the sidebar cover the entire
-screen with no visible way back — there's no backdrop to tap and no close control.
-
-Fix it so the menu is dismissable:
-- The sidebar should not occupy the full viewport width. Leave a visible strip of
-  the page behind it.
-- Add a dimmed backdrop over the remaining area that closes the menu when tapped.
-- Add an explicit close (X) control in the sidebar header, since a backdrop alone
-  isn't obvious on a small screen.
-- Escape key closes it too.
-- When open, prevent the page behind from scrolling.
-
-Check FILAMENT_UI.md for how this panel's theme is built before overriding
-anything. Prefer Filament's own configuration and theme CSS over blanket
-!important overrides on its internal classes — those break on the next upgrade.
-
-Verify at 320px, 375px, and 768px. Confirm the desktop sidebar behaviour is
-unchanged.
+Hook the payment events into the existing webhook/callback handler rather
+than the frontend redirect, so notifications fire even if the customer
+closes the browser. Show me where you wired it in.
