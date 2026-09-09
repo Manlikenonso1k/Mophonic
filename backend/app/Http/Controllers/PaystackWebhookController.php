@@ -43,7 +43,9 @@ class PaystackWebhookController extends Controller
                 $order = Order::query()->where('payment_reference', $reference)->first();
 
                 if ($order) {
-                    $this->payments->markPaid($order);
+                    // Notifying from here (rather than the browser redirect)
+                    // is what makes the alert survive a closed tab.
+                    $this->payments->markPaid($order, (array) ($event['data'] ?? []));
                 }
             }
         } catch (Throwable $e) {

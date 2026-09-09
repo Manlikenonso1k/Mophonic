@@ -41,12 +41,12 @@ class ShopPaymentController extends Controller
         }
 
         if (($data['status'] ?? '') === 'success') {
-            $this->payments->markPaid($order);
+            $this->payments->markPaid($order, $data);
 
             return redirect()->away($shopUrl.'/shop/thank-you?reference='.$order->reference);
         }
 
-        $this->payments->markFailed($order);
+        $this->payments->markFailed($order, $data['gateway_response'] ?? null);
 
         return redirect()->away($shopUrl.'/shop?payment=failed&reference='.$order->reference);
     }
