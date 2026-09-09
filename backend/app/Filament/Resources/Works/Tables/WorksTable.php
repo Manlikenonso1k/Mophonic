@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Works\Tables;
 
+use App\Filament\Resources\Works\WorkResource;
 use App\Models\Work;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -56,13 +57,17 @@ class WorksTable
                 TernaryFilter::make('is_active')->label('Visible on the site'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (Work $record): bool => WorkResource::canEdit($record)),
+                DeleteAction::make()
+                    ->visible(fn (Work $record): bool => WorkResource::canDelete($record)),
             ])
-            ->toolbarActions([
+            // No bulk delete for anyone who cannot delete: an empty
+            // group would still draw the selection checkboxes.
+            ->toolbarActions(WorkResource::canDeleteAny() ? [
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ] : []);
     }
 }

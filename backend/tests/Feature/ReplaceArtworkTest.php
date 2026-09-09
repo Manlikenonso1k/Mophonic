@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Works\Pages\EditWork;
-use App\Models\User;
 use App\Models\Work;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -19,7 +18,7 @@ class ReplaceArtworkTest extends TestCase
     {
         Storage::fake('public');
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         $work = Work::create([
             'title' => 'K-POP Video',

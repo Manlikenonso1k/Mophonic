@@ -15,7 +15,8 @@ class EditOrder extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => static::getResource()::canDelete($this->getRecord())),
         ];
     }
 }

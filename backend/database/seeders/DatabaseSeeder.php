@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call([
+            // Runs after the account above exists, so the super admin
+            // assignment has someone to grant the role to.
+            RolesAndPermissionsSeeder::class,
             WorkSeeder::class,
             ShopSeeder::class,
         ]);

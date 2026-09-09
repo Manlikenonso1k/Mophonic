@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Order;
 use App\Support\Money;
 use Filament\Actions\BulkActionGroup;
@@ -69,12 +70,15 @@ class OrdersTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn (Order $record): bool => OrderResource::canEdit($record)),
             ])
-            ->toolbarActions([
+            // No bulk delete for anyone who cannot delete: an empty
+            // group would still draw the selection checkboxes.
+            ->toolbarActions(OrderResource::canDeleteAny() ? [
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ] : []);
     }
 }

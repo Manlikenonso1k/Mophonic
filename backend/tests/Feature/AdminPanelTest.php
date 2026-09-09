@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\ManageSiteSettings;
 use App\Models\SiteSetting;
-use App\Models\User;
 use App\Models\Work;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -21,7 +20,7 @@ class AdminPanelTest extends TestCase
 
     public function test_an_admin_can_reach_every_panel_screen(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->superAdminUser();
 
         $work = Work::create([
             'title' => 'K-POP Video',
@@ -42,7 +41,7 @@ class AdminPanelTest extends TestCase
 
     public function test_an_admin_can_save_the_site_settings(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs($this->superAdminUser());
 
         Livewire::test(ManageSiteSettings::class)
             ->fillForm([

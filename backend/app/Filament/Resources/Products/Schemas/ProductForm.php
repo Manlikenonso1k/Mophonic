@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use App\Support\Money;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,6 +20,7 @@ class ProductForm
         return $schema
             ->components([
                 Section::make('Product')
+                    ->disabled(fn (): bool => ! self::canEditDetails())
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
@@ -48,6 +50,7 @@ class ProductForm
 
                 Section::make('Photo')
                     ->description('Upload an image, or paste a URL if it is hosted elsewhere.')
+                    ->disabled(fn (): bool => ! self::canEditImages())
                     ->columns(2)
                     ->schema([
                         FileUpload::make('image')
@@ -58,6 +61,7 @@ class ProductForm
                             ->directory('products')
                             ->visibility('public')
                             ->maxSize(20480)
+                            ->deletable(fn (): bool => Filament::auth()->user()?->can('delete_product_image') ?? false)
                             ->helperText('An uploaded file always wins over the URL below.'),
                         TextInput::make('image_url')
                             ->label('…or photo URL')
@@ -66,6 +70,7 @@ class ProductForm
                     ]),
 
                 Section::make('Price & stock')
+                    ->disabled(fn (): bool => ! self::canEditDetails())
                     ->columns(3)
                     ->schema([
                         // Stored in kobo; edited in naira.
@@ -93,5 +98,21 @@ class ProductForm
                             ->default(true),
                     ]),
             ]);
+    }
+
+    /**
+     * A disabled field is not dehydrated, so an image-only editor cannot move
+     * a price even by crafting the request — the value never reaches the model.
+     */
+    protected static function canEditDetails(): bool
+    {
+        return Filament::auth()->user()?->can('update_product') ?? false;
+    }
+
+    protected static function canEditImages(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return ($user?->can('update_product') || $user?->can('update_product_image')) ?? false;
     }
 }

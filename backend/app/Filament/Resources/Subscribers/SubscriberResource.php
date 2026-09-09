@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Subscribers;
 
+use App\Filament\Concerns\AuthorizesWithPermissions;
 use App\Filament\Resources\Subscribers\Pages\CreateSubscriber;
 use App\Filament\Resources\Subscribers\Pages\EditSubscriber;
 use App\Filament\Resources\Subscribers\Pages\ListSubscribers;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class SubscriberResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
     protected static ?string $model = Subscriber::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
@@ -26,6 +29,11 @@ class SubscriberResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Site';
 
     protected static ?int $navigationSort = 2;
+
+    protected static function permissionSubject(): string
+    {
+        return 'subscriber';
+    }
 
     public static function form(Schema $schema): Schema
     {

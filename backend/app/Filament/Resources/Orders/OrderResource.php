@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Filament\Concerns\AuthorizesWithPermissions;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Orders\Pages\ViewOrder;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class OrderResource extends Resource
 {
+    use AuthorizesWithPermissions;
+
     protected static ?string $model = Order::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
@@ -27,6 +30,11 @@ class OrderResource extends Resource
     protected static ?string $recordTitleAttribute = 'reference';
 
     protected static ?int $navigationSort = 12;
+
+    protected static function permissionSubject(): string
+    {
+        return 'order';
+    }
 
     /** Orders arrive from checkout; staff never key one in by hand. */
     public static function canCreate(): bool

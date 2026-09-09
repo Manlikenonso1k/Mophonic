@@ -4,11 +4,17 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use App\Support\Money;
+use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
 class SalesOverview extends ChartWidget
 {
+    public static function canView(): bool
+    {
+        return Filament::auth()->user()?->can('view_revenue') ?? false;
+    }
+
     protected ?string $heading = 'Revenue';
 
     protected ?string $description = 'Paid orders, by day.';

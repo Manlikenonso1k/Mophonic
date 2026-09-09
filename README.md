@@ -15,6 +15,9 @@ utopia-world-travis-scott/
 
 ## Run it
 
+ victorynonso9@gmail.com
+ - Password: utopia1234
+
 **1. Backend** (http://127.0.0.1:8010, admin at `/admin`)
 
 ```sh
@@ -63,6 +66,34 @@ configuring in development. Point it elsewhere with `VITE_BACKEND_ORIGIN`.
 | **Videos & Albums** | One row per carousel item: title, slug, type, cover artwork, background video, order, visibility. Drag rows to reorder. |
 | **Subscribers** | Emails captured by the newsletter form in the menu. |
 | **Site settings** | Header text, shop/terms links, newsletter heading, delivery fee, and the menu links. |
+| **Users** | Create staff accounts and assign roles. Super admin only. |
+
+## Roles
+
+Access is decided by granular permissions (`view_any_order`, `update_product_image`, …),
+never by role name, so a new role is a matter of granting permissions.
+
+| Role | Can |
+| --- | --- |
+| **super_admin** | Everything, via a `Gate::before` grant — new permissions never need re-granting. |
+| **waiter** | View orders and order details; replace product and work images. No prices, no users, no settings, no revenue. |
+
+An account with **no role cannot open the panel at all**. Set `ADMIN_SUPER_EMAIL` in
+`.env` and run the seeder to bootstrap the first super admin:
+
+```sh
+php artisan db:seed --class=RolesAndPermissionsSeeder
+```
+
+If nobody can get in, grant a role from the command line:
+
+```sh
+php artisan role:assign someone@example.com super_admin        # add
+php artisan role:assign someone@example.com waiter --replace   # or swap
+```
+
+Two lockouts are blocked in the panel and again on save: nobody can change their own
+role, and the last remaining super admin cannot be demoted or deleted.
 
 The dashboard carries three widgets: revenue over time (7/30/90 days), order counts by
 status, and the most recent orders.
@@ -123,13 +154,18 @@ Uploads land in `backend/storage/app/public/works/…` and are served through th
 cd backend && php artisan test
 ```
 
-36 tests. Site: API payload and ordering, upload-wins-over-URL, replacing a cover and a
+55 tests. Site: API payload and ordering, upload-wins-over-URL, replacing a cover and a
 video through the admin form, subscriber validation, panel access control, every admin
 screen, saving site settings. Shop: product visibility and ordering, cart totals from the
 price table, duplicate-line merging, stock limits, order creation with snapshotted line
 items, client-supplied prices ignored, zero-priced carts rejected, idempotent crediting
 with stock drawn down once, webhook signature handling, orders not creatable by hand, and
-the order form exposing no line items or totals.
+the order form exposing no line items or totals. Roles: a waiter is refused the user list
+and the order edit form, can replace a product image, and cannot move a price even by
+submitting one; a super admin can do all three; the last super admin cannot be demoted;
+nobody can change their own role; a user with no role cannot open the panel. Telegram:
+queued on order and on payment, once per payment across a callback/webhook race, escaped
+for HTML, and swallowed when the API is down.
 
 ## Deploying
 
@@ -165,7 +201,9 @@ ADMIN_PASSWORD=…
 APP_URL=https://your-domain.com
 ```
 
-Then `php artisan migrate --seed && php artisan storage:link`. Media uploads live on
+Then `php artisan migrate --seed && php artisan storage:link`. Set `ADMIN_SUPER_EMAIL`
+before seeding, or the first super admin is never assigned (the seeder logs a warning
+rather than failing). Media uploads live on
 the local disk, so use persistent storage (or point the `public` disk at S3).
 
 ## Notes on fidelity

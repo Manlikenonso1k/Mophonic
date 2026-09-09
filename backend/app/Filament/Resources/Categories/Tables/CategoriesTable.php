@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Filament\Resources\Categories\CategoryResource;
+use App\Models\Category;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -35,13 +37,17 @@ class CategoriesTable
                     ->boolean(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn (Category $record): bool => CategoryResource::canEdit($record)),
+                DeleteAction::make()
+                    ->visible(fn (Category $record): bool => CategoryResource::canDelete($record)),
             ])
-            ->toolbarActions([
+            // No bulk delete for anyone who cannot delete: an empty
+            // group would still draw the selection checkboxes.
+            ->toolbarActions(CategoryResource::canDeleteAny() ? [
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ] : []);
     }
 }
