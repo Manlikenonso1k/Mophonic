@@ -30,6 +30,7 @@ export default function Checkout() {
   const [notice, setNotice] = useState(null)
   const [deliveryKobo, setDeliveryKobo] = useState(0)
   const summaryRef = useRef(null)
+  const inFlight = useRef(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -68,6 +69,14 @@ export default function Checkout() {
 
   async function onSubmit(event) {
     event.preventDefault()
+    event.stopPropagation()
+
+    // `disabled` only takes effect after a render. A second submit dispatched
+    // in the same tick — a double tap, or a stray Enter — would otherwise
+    // place the order twice.
+    if (inFlight.current) {
+      return
+    }
 
     const found = validate()
     setErrors(found)
@@ -78,6 +87,7 @@ export default function Checkout() {
       return
     }
 
+    inFlight.current = true
     setStatus('sending')
     setNotice(null)
 
@@ -101,9 +111,14 @@ export default function Checkout() {
       )
 
       setErrors(flattened)
-      setNotice(problem.message)
+      setNotice(
+        problem.message ||
+          'We could not reach the server. Check your connection and try again.',
+      )
       setStatus('idle')
       window.requestAnimationFrame(() => summaryRef.current?.focus())
+    } finally {
+      inFlight.current = false
     }
   }
 
@@ -122,6 +137,7 @@ export default function Checkout() {
   }
 
   const errorList = Object.entries(errors)
+  const showSummary = errorList.length > 0 || Boolean(notice)
 
   return (
     <main className="shop">
@@ -129,7 +145,7 @@ export default function Checkout() {
 
       <form onSubmit={onSubmit} noValidate className="grid gap-12 lg:grid-cols-[1fr_360px] mt-8">
         <section>
-          {errorList.length > 0 ? (
+          {showSummary ? (
             <div className="error-summary" role="alert" tabIndex={-1} ref={summaryRef}>
               <p className="mb-2">{notice ?? 'Please check the fields below.'}</p>
               <ul>

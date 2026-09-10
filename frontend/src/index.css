@@ -230,6 +230,11 @@ body.js-modal-open { overflow: hidden !important; }
 --------------------------------------------------------------------------- */
 .button {
   display: inline-flex;
+  /* The :after below is a touch halo. Without a containing block here it
+     resolves against the nearest positioned ancestor — .shop — and inset:-10px
+     stretches it over the entire page, swallowing taps meant for other
+     controls. It must stay positioned. */
+  position: relative;
   height: 30px;
   line-height: 1;
   align-items: center;
@@ -526,6 +531,26 @@ input[type='checkbox']:checked:after { transform: scale(1); opacity: 1; }
 @media screen and (max-width: 680px) {
   .line-item { grid-template-columns: 60px 1fr; row-gap: 12px; }
   .line-item .line-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+}
+
+@media screen and (max-width: 680px) {
+  /* Touch targets. 44px minimum on every cart control, with enough space
+     between them that a thumb cannot catch two at once — and no halos, since
+     the controls are now big enough to hit on their own. */
+  .line-actions { gap: 20px; }
+
+  .line-actions .button {
+    height: 44px;
+    min-width: 44px;
+    padding: 0 14px;
+  }
+
+  .line-actions .button:after,
+  .shop .button:after { display: none; }
+
+  .stepper button { height: 44px; }
+
+  .shop .button.large { height: 48px; }
 }
 
 .line-item .thumb {
