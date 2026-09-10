@@ -73,7 +73,14 @@ export default function Cart() {
                 <button
                   type="button"
                   className="button bare"
-                  onClick={() => remove(line.productId)}
+                  onClick={(event) => {
+                    // Removing is destructive and sits next to the controls
+                    // that lead to checkout: it must never ride a bubbled tap
+                    // or a default action on the way out.
+                    event.preventDefault()
+                    event.stopPropagation()
+                    remove(line.productId)
+                  }}
                   aria-label={`Remove ${line.name} from cart`}
                 >
                   <span>Remove</span>

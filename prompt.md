@@ -1,38 +1,41 @@
-Add role-based access control to the Filament admin panel.
+Bug: checkout is completely broken on mobile, works fine on desktop.
 
-Package: spatie/laravel-permission. Install, publish and run its migrations.
-Add HasRoles to the User model.
+Symptom: on a mobile browser, opening the cart and tapping checkout causes
+cart items to be removed one at a time until the cart is empty, and no
+checkout or payment redirect happens. Desktop is unaffected.
 
-Roles and permissions:
-- Create a seeder defining two roles: super_admin and waiter.
-- super_admin: all permissions, including managing users and assigning roles.
-- waiter: can view orders and order details, and can create/update/delete
-  product and work images. Cannot view users, cannot change prices, cannot
-  delete orders, cannot access settings.
-- Define permissions granularly (e.g. view_order, view_any_order,
-  update_product_image, ...) rather than one blanket permission per resource.
+Investigate before changing anything. Report what you find, then fix.
 
-Super admin bootstrapping:
-- Add config/admin.php with a 'super_admin_email' value read from
-  ADMIN_SUPER_EMAIL in .env. Do not hardcode the address in code.
-- Seeder assigns super_admin to that email if the user exists; if not,
-  log a warning rather than failing.
-- Add a Gate::before check granting super_admin every permission, so new
-  permissions never need re-granting.
+Prime suspects, check each and tell me which applies:
+1. Ghost/double-fire touch events — a handler bound to both onClick and
+   onTouchStart/onTouchEnd, firing twice per tap.
+2. Event bubbling — the remove-item button is inside the checkout button's
+   click target, or a parent onClick catches taps that miss a child on a
+   narrow viewport.
+3. Overlapping hit areas at mobile breakpoints — the remove control sits
+   under the checkout button once the layout stacks. Check computed
+   positions at 375px width, not just whether it looks right.
+4. A click handler firing on a re-render loop, where removing an item
+   re-renders and immediately triggers the next removal.
+5. Cart persistence failing on mobile — localStorage/sessionStorage blocked
+   in private browsing on iOS Safari, so state resets on each interaction.
+6. The checkout request failing silently (CORS, mixed content, or an
+   unhandled promise rejection) with no error surfaced to the user.
 
-Filament:
-- Add a UserResource, visible only to super_admin, that can create users
-  and assign roles. Never allow a user to change their own role, and never
-  allow the last super_admin to be demoted or deleted.
-- Guard every existing Resource with canViewAny/canCreate/canUpdate/canDelete
-  based on permissions, not on role names.
-- Hide navigation items the user lacks permission for, so the waiter sees
-  a clean sidebar rather than pages that error on click.
-- On the Order resource for waiters: make it read-only — view details, no
-  edit form, no delete action, no bulk actions.
+Required fixes regardless of cause:
+- Every remove-item control must call stopPropagation and preventDefault.
+- Never bind both a click and a touch handler to the same action.
+- Minimum 44x44px touch targets on all cart controls, with adequate spacing
+  so adjacent controls cannot be hit accidentally.
+- The checkout action must surface errors to the user — a failed request
+  should show a message, never fail silently.
+- Add a guard so checkout cannot fire while a request is already in flight.
 
-Also:
-- An artisan command to assign a role to a user by email, for recovery.
-- Tests: a waiter cannot reach the user list, cannot edit an order, and
-  can update a product image; a super_admin can do all three; the last
-  super_admin cannot be demoted.
+Verification:
+- Test at 375px and 414px viewport widths, not just desktop with a narrow
+  window — touch events differ from mouse events and a resized desktop
+  browser will not reproduce this.
+- Confirm the full flow: add to cart, open cart, checkout, Paystack redirect.
+- Add a regression test that a tap on checkout does not trigger remove-item.
+
+Report the root cause explicitly before showing the fix.
