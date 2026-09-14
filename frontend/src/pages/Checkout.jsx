@@ -103,7 +103,7 @@ export default function Checkout() {
       }
 
       clear()
-      navigate(`/shop/thank-you?reference=${encodeURIComponent(result.reference)}`)
+      navigate(`/order/${encodeURIComponent(result.reference)}`)
     } catch (problem) {
       const serverErrors = problem.errors ?? {}
       const flattened = Object.fromEntries(

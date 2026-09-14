@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Services\CartPricer;
 use App\Services\OrderNotifier;
 use App\Services\PaystackService;
+use App\Services\ReceiptRenderer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class OrderController extends Controller
         private readonly CartPricer $pricer,
         private readonly PaystackService $paystack,
         private readonly OrderNotifier $notifier,
+        private readonly ReceiptRenderer $receipts,
     ) {}
 
     public function store(Request $request): JsonResponse
@@ -121,6 +123,12 @@ class OrderController extends Controller
                 'reference' => $order->reference,
                 'status' => $order->status,
                 'paymentStatus' => $order->payment_status,
+                'placedAt' => $order->created_at?->toIso8601String(),
+                // Only a paid order has a receipt, and the link is signed.
+                'receiptUrl' => $order->isPaid() ? $this->receipts->signedUrl($order) : null,
+                'customerName' => $order->customer_name,
+                'customerPhone' => $order->customer_phone,
+                'deliveryAddress' => $order->delivery_address,
                 'subtotalKobo' => $order->subtotal_kobo,
                 'deliveryFeeKobo' => $order->delivery_fee_kobo,
                 'totalKobo' => $order->total_kobo,

@@ -12,7 +12,8 @@ import Checkout from './pages/Checkout'
 import Mophonik from './pages/Mophonik'
 import ProductDetail from './pages/ProductDetail'
 import Shop from './pages/Shop'
-import ThankYou from './pages/ThankYou'
+import LegacyThankYou from './pages/LegacyThankYou'
+import OrderConfirmation from './pages/OrderConfirmation'
 import WorkDetail from './pages/WorkDetail'
 
 const FALLBACK_SETTINGS = {
@@ -128,7 +129,8 @@ export default function App() {
           <Route path="/" element={<Mophonik settings={settings} works={works} />} />
           <Route path="/mophonik/:slug" element={<WorkDetail works={works} loading={!site} />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/shop/thank-you" element={<ThankYou />} />
+          <Route path="/order/:reference" element={<OrderConfirmation />} />
+          <Route path="/shop/thank-you" element={<LegacyThankYou />} />
           <Route path="/shop/:slug" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />

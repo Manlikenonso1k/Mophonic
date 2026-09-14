@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -73,6 +74,16 @@ class ManageSiteSettings extends Page
                         TextInput::make('heading')
                             ->label('Page title')
                             ->required(),
+                    ]),
+
+                Section::make('Business')
+                    ->description('Printed on customer receipts.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('business_name')->required(),
+                        TextInput::make('business_phone')->tel(),
+                        TextInput::make('business_email')->email(),
+                        Textarea::make('business_address')->rows(2)->columnSpanFull(),
                     ]),
 
                 Section::make('Links')

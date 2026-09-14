@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\Orders\Tables;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Filament\Resources\Orders\Pages\ViewOrderReceipt;
 use App\Models\Order;
 use App\Support\Money;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -70,6 +72,11 @@ class OrdersTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('receipt')
+                    ->label('Receipt')
+                    ->icon('heroicon-o-receipt-percent')
+                    ->url(fn (Order $record): string => OrderResource::getUrl('receipt', ['record' => $record]))
+                    ->visible(fn (): bool => ViewOrderReceipt::canAccessReceipt()),
                 EditAction::make()
                     ->visible(fn (Order $record): bool => OrderResource::canEdit($record)),
             ])

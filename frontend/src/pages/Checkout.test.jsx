@@ -25,7 +25,7 @@ function renderCheckout() {
       <CartProvider>
         <Routes>
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/shop/thank-you" element={<h1>Thank you</h1>} />
+          <Route path="/order/:reference" element={<h1>Thank you</h1>} />
         </Routes>
       </CartProvider>
     </MemoryRouter>,
