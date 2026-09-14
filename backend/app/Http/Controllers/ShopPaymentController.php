@@ -26,7 +26,9 @@ class ShopPaymentController extends Controller
         $reference = (string) $request->query('reference', $request->query('trxref', ''));
         $order = Order::query()->where('payment_reference', $reference)->first();
 
-        $shopUrl = rtrim((string) config('app.frontend_url'), '/');
+        // A server that never set FRONTEND_URL must still send payers somewhere
+        // real, so this falls back to the app's own public URL.
+        $shopUrl = rtrim((string) (config('app.frontend_url') ?: config('app.url')), '/');
 
         if (! $order) {
             return redirect()->away($shopUrl.'/shop?payment=unknown');
@@ -37,17 +39,17 @@ class ShopPaymentController extends Controller
         } catch (Throwable $e) {
             Log::error('Paystack verify failed: '.$e->getMessage());
 
-            return redirect()->away($shopUrl.'/shop?payment=unverified&reference='.$order->reference);
+            return redirect()->away($shopUrl.'/order/'.rawurlencode($order->reference).'?payment=unverified');
         }
 
         if (($data['status'] ?? '') === 'success') {
             $this->payments->markPaid($order, $data);
 
-            return redirect()->away($shopUrl.'/shop/thank-you?reference='.$order->reference);
+            return redirect()->away($shopUrl.'/order/'.rawurlencode($order->reference));
         }
 
         $this->payments->markFailed($order, $data['gateway_response'] ?? null);
 
-        return redirect()->away($shopUrl.'/shop?payment=failed&reference='.$order->reference);
+        return redirect()->away($shopUrl.'/order/'.rawurlencode($order->reference).'?payment=failed');
     }
 }

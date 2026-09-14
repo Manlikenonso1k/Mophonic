@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Toast from '../components/feedback/Toast'
 import ProductCard from '../components/shop/ProductCard'
 import ShopHeader from '../components/shop/ShopHeader'
 import { useCart } from '../cart/useCart'
@@ -6,6 +7,7 @@ import { fetchShop } from '../shopApi'
 
 export default function Shop() {
   const [data, setData] = useState(null)
+  const addedTimer = useRef(null)
   const [error, setError] = useState(null)
   const [category, setCategory] = useState('all')
   const [added, setAdded] = useState(null)
@@ -29,10 +31,16 @@ export default function Shop() {
     return category === 'all' ? all : all.filter((product) => product.category === category)
   }, [data, category])
 
+  // One timer, replaced on each add and cleared on unmount, so a fast tapper
+  // cannot leave a pile of them running.
+  useEffect(() => () => window.clearTimeout(addedTimer.current), [])
+
   function addToCart(product) {
     add(product, 1)
-    setAdded(product.name)
-    window.setTimeout(() => setAdded(null), 2600)
+    setAdded({ name: product.name, at: Date.now() })
+
+    window.clearTimeout(addedTimer.current)
+    addedTimer.current = window.setTimeout(() => setAdded(null), 2600)
   }
 
   return (
@@ -82,15 +90,7 @@ export default function Shop() {
         </>
       )}
 
-      <p className="sr-only" role="status" aria-live="polite">
-        {added ? `${added} added to cart` : ''}
-      </p>
-
-      {added ? (
-        <div className="fixed bottom-[104px] left-1/2 -translate-x-1/2 z-[12] button no-blur">
-          <span>{added} added</span>
-        </div>
-      ) : null}
+      <Toast message={added ? `${added.name} added` : null} />
     </main>
   )
 }

@@ -9,6 +9,10 @@ class SiteSetting extends Model
     protected $fillable = [
         'eyebrow',
         'heading',
+        'business_name',
+        'business_phone',
+        'business_email',
+        'business_address',
         'shop_url',
         'terms_url',
         'newsletter_heading',
@@ -27,6 +31,7 @@ class SiteSetting extends Model
         return static::query()->firstOrCreate(['id' => 1], [
             'eyebrow' => 'EXPLORE',
             'heading' => 'MOPHONIK',
+            'business_name' => 'Mophonik',
             'shop_url' => '/shop',
             'terms_url' => '/terms',
             'newsletter_heading' => 'Enter email for updates',

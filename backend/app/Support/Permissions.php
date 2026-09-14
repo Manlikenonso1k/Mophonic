@@ -28,6 +28,7 @@ class Permissions
                 'view_site_settings',
                 'update_site_settings',
                 'view_revenue',
+                'view_order_receipt',
             ],
         );
     }
@@ -43,6 +44,7 @@ class Permissions
         return [
             'view_any_order',
             'view_order',
+            'view_order_receipt',
 
             'view_any_product',
             'view_product',
