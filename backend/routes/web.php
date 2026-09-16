@@ -20,5 +20,5 @@ Route::post('/webhooks/paystack', [PaystackWebhookController::class, 'handle'])
 
 // Signed so a receipt cannot be fetched by walking references or ids.
 Route::get('/receipts/{reference}', ReceiptController::class)
-    ->middleware('signed')
+    ->middleware('signed:relative')
     ->name('shop.receipt');

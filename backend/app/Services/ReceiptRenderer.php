@@ -43,6 +43,10 @@ class ReceiptRenderer
     /**
      * A short-lived signed link. The reference is already unguessable, and the
      * signature means a leaked link cannot be replayed indefinitely.
+     *
+     * Deliberately relative: the shopper then fetches it from whatever origin
+     * served the page, so the download works without CORS, and the signature
+     * survives a host that does not match APP_URL.
      */
     public function signedUrl(Order $order): string
     {
@@ -50,6 +54,7 @@ class ReceiptRenderer
             'shop.receipt',
             now()->addDays(30),
             ['reference' => $order->reference],
+            absolute: false,
         );
     }
 }

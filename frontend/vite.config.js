@@ -11,6 +11,7 @@ export default defineConfig({
     proxy: {
       '/api': { target: backend, changeOrigin: true },
       '/storage': { target: backend, changeOrigin: true },
+      '/receipts': { target: backend, changeOrigin: true },
     },
   },
   test: {
